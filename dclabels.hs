@@ -14,7 +14,6 @@ import DemoHelper
 
    For this talk we are only going to use the secrecy components.
 -}
---------------------------------------------------------------------
 
 -- Some labels
 --------------------------------------------------------------------
