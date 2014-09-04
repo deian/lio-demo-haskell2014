@@ -3,6 +3,7 @@ module SimpleLIO (LIO, tryLIO, raiseLabel, getLabel,
                   LIORef, writeLIORef, readLIORef, newLIORef,
                   writeLIORefP, readLIORefP,
                   debug ) where
+
 -- Imports
 import Control.Monad
 import Control.Applicative
@@ -34,10 +35,10 @@ newtype LIO a = LIOTCB (IORef CNF -> IO a)
 -- How do we execute untrusted code?
 tryLIO :: LIO a -> IO (Either SomeException a, CNF)
 tryLIO (LIOTCB act) = do
-  s0 <- newIORef public
-  ea <- try $ act s0
-  s1 <- readIORef s0
-  return (ea, s1)
+  s  <- newIORef public
+  ea <- try $ act s 
+  l  <- readIORef s
+  return (ea, l)
 
 -- Trusted code may want to lift IO actions into LIO
 -- Unsafe for untrusted code to have access to this.
@@ -50,7 +51,8 @@ getLabel = LIOTCB readIORef
 
 -- Set the current label. Only safe to raise.
 raiseLabel :: CNF -> LIO ()
-raiseLabel l = LIOTCB $ \r -> modifyIORef r (\lcur -> lcur `lub` l)
+raiseLabel l = LIOTCB $ \r -> 
+  modifyIORef r (\lcur -> lcur `lub` l)
 
 instance Monad LIO where
   return = LIOTCB . const . return

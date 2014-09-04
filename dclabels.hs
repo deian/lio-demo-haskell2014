@@ -3,31 +3,28 @@ import LIO.DCLabel
 import LIO.Run (privInit)
 import DemoHelper
 
-{- 
-   DCLabel consists of two formula: secrecy %% integrity
-  
-   secrecy: describes the authority required to make 
-            the data public.
-  
-   integrity: describes the authority with which
-              data was endorsed/is required to modify.
+{- DCLabel consists of two CNF formula: secrecy %% integrity
 
    For this talk we are only going to use the secrecy components.
+  
+   Secrecy formula describes the authority required to make the data
+   public. I.e., the principal to whom it is sensitive.
 -}
 
 -- Some labels
 --------------------------------------------------------------------
 
-public = toCNF True    -- Public
-alice  = toCNF "alice" -- Alice can make data public
-bob    = toCNF "bob"   -- Bob can make data public
+public = toCNF True                -- Public
+alice  = toCNF "alice"             -- Alice's secret data
+bob    = toCNF "bob.4chan.org"     -- Label of Bob's personal server
+iCloud = toCNF "upload.icloud.com" -- Label of iCloud's upload server
 
 
 -- Alice or Bob can make data public:
-aliceOrBob = "alice" \/ "bob"
+aliceOrBob = alice \/ bob
 
 -- Alice and Bob need to authorize the making of this data public:
-aliceAndBob = "alice" /\ "bob"
+aliceAndBob = alice /\ bob
 
 -- How do we check if a flow of information is allowed?
 --------------------------------------------------------------------
@@ -55,8 +52,8 @@ example2 =
 --------------------------------------------------------------------
 
 {-
-   A privilege can be used to:
-    - remove secrecy restrictions (make data more public; declassify)
+   A privilege can be used to remove secrecy restrictions (make data
+   more public). This is commonly called declassification.
 -}
 
 -- downgradeP: make data as public as possible
@@ -75,7 +72,7 @@ example3 =
 example4 =
  [ canFlowToP alice aliceOrBob public  == undefined
   -------------------------------------------------
- , canFlowToP alice alice bob          == undefined
+ , canFlowToP alice alice iCloud       == undefined
   -------------------------------------------------
  , canFlowToP alice aliceAndBob alice  == undefined ]
 
