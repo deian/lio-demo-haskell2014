@@ -11,7 +11,7 @@ import DemoHelper
    public. I.e., the principal to whom it is sensitive.
 -}
 
--- Some labels
+-- Some labels we are going to use
 --------------------------------------------------------------------
 
 public = toCNF True                -- Public
@@ -20,8 +20,8 @@ bob    = toCNF "bob.4chan.org"     -- Label of Bob's personal server
 iCloud = toCNF "upload.icloud.com" -- Label of iCloud's upload server
 
 
--- Alice or Bob can make data public:
-aliceOrBob = alice \/ bob
+-- Alice or iCloud can make data public:
+aliceOrIC = alice \/ iCloud
 
 -- Alice and Bob need to authorize the making of this data public:
 aliceAndBob = alice /\ bob
@@ -36,7 +36,7 @@ example1 =
   -----------------------------------------
  , canFlowTo alice      bob    == undefined
   -----------------------------------------
- , canFlowTo aliceOrBob bob    == undefined ]
+ , canFlowTo aliceOrIC  iCloud == undefined ]
 
 -- What happens when we combine data? Least Upper Bound!
 --------------------------------------------------------------------
@@ -62,7 +62,7 @@ example2 =
 example3 = 
  [ downgradeP alice alice       == undefined
   ------------------------------------------
- , downgradeP alice aliceOrBob  == undefined
+ , downgradeP alice aliceOrIC   == undefined
   ------------------------------------------
  , downgradeP alice aliceAndBob == undefined ]
 
@@ -70,7 +70,7 @@ example3 =
 --------------------------------------------------------------------
 
 example4 =
- [ canFlowToP alice aliceOrBob public  == undefined
+ [ canFlowToP alice aliceOrIC  public  == undefined
   -------------------------------------------------
  , canFlowToP alice alice iCloud       == undefined
   -------------------------------------------------

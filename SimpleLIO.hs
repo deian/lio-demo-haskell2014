@@ -18,30 +18,20 @@ debug str = do
  l <- getLabel
  ioTCB $ putStrLn (show l ++">: "++str)
 
-{- LIO monad
+{- LIO monad used to define secure safe Haskell sublanguage.
   
-   Untrusted code executes in LIO monad.
+   All untrusted code executes in LIO monad.
 
-   LIO monad keeps track of a current label:
+   Monad keeps track of a current label:
 
    - Refects sensitivity of data read by the computation.
    - Restricts writes to objects that are at least as
      sensitive---i.e., current label must flow to label of object.
 -}
 
-newtype LIO a = LIOTCB (IORef CNF -> IO a)
--- Constructor must not be exported!
-
--- How do we execute untrusted code?
-tryLIO :: LIO a -> IO (Either SomeException a, CNF)
-tryLIO (LIOTCB act) = do
-  s  <- newIORef public
-  ea <- try $ act s 
-  l  <- readIORef s
-  return (ea, l)
+newtype LIO a = LIOTCB (IORef CNF -> IO a) -- Must not be exported!
 
 -- Trusted code may want to lift IO actions into LIO
--- Unsafe for untrusted code to have access to this.
 ioTCB :: IO a -> LIO a
 ioTCB = LIOTCB . const
 
@@ -53,6 +43,14 @@ getLabel = LIOTCB readIORef
 raiseLabel :: CNF -> LIO ()
 raiseLabel l = LIOTCB $ \r -> 
   modifyIORef r (\lcur -> lcur `lub` l)
+
+-- How do we execute untrusted code?
+tryLIO :: LIO a -> IO (Either SomeException a, CNF)
+tryLIO (LIOTCB act) = do
+  s  <- newIORef public
+  ea <- try $ act s 
+  l  <- readIORef s
+  return (ea, l)
 
 instance Monad LIO where
   return = LIOTCB . const . return
@@ -92,6 +90,9 @@ newLIORef l x = do
     then do r <- ioTCB $ newIORef x
             return $ LIORefTCB l r
     else fail "allocation may leak data"
+
+-- Privileged LIORef interface 
+----------------------------------------------------------------
 
 writeLIORefP :: DCPriv -> LIORef a -> a -> LIO ()
 writeLIORefP priv (LIORefTCB l r) x = do

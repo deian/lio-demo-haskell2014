@@ -62,12 +62,3 @@ example3 alicePriv = do
 
   writeLIORefP alicePriv icRef ("uploading: " ++ show a) -- OK!
   debug "Uploaded photo to iCloud!"
-
-{- In actual LIO, context also has current clearance.
-
-   - Use as a form of discretionary access control: upper bound on
-     current label
-   - Cannot read data labeled above clearance
-   - Cannot allocate objects labeled above the clearance
-
--}
