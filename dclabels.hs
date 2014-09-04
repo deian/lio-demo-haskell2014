@@ -19,10 +19,8 @@ alice  = toCNF "alice"             -- Alice's secret data
 bob    = toCNF "bob.4chan.org"     -- Label of Bob's personal server
 iCloud = toCNF "upload.icloud.com" -- Label of iCloud's upload server
 
-
 -- Alice or iCloud can make data public:
 aliceOrIC = alice \/ iCloud
-
 -- Alice and Bob need to authorize the making of this data public:
 aliceAndBob = alice /\ bob
 

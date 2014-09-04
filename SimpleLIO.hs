@@ -18,7 +18,7 @@ debug str = do
  l <- getLabel
  ioTCB $ putStrLn (show l ++">: "++str)
 
-{- LIO monad used to define secure safe Haskell sublanguage.
+{- LIO monad is used to define secure safe Haskell sublanguage.
   
    All untrusted code executes in LIO monad.
 
@@ -31,10 +31,6 @@ debug str = do
 
 newtype LIO a = LIOTCB (IORef CNF -> IO a) -- Must not be exported!
 
--- Trusted code may want to lift IO actions into LIO
-ioTCB :: IO a -> LIO a
-ioTCB = LIOTCB . const
-
 -- Get the current label
 getLabel :: LIO CNF
 getLabel = LIOTCB readIORef
@@ -45,12 +41,17 @@ raiseLabel l = LIOTCB $ \r ->
   modifyIORef r (\lcur -> lcur `lub` l)
 
 -- How do we execute untrusted code?
+----------------------------------------------------------------
 tryLIO :: LIO a -> IO (Either SomeException a, CNF)
 tryLIO (LIOTCB act) = do
   s  <- newIORef public
   ea <- try $ act s 
   l  <- readIORef s
   return (ea, l)
+
+-- Trusted code may want to lift IO actions into LIO
+ioTCB :: IO a -> LIO a
+ioTCB = LIOTCB . const
 
 instance Monad LIO where
   return = LIOTCB . const . return

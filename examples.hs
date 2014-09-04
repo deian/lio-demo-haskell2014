@@ -3,7 +3,7 @@ import SimpleLIO
 import LIO.DCLabel
 import DemoHelper2 hiding (tryDCS, DCS)
 
--- How to run examples
+-- How we're going to run the examples
 run :: Example -> IO ()
 run lioExample = do
   -- Mint alice's privilege:
