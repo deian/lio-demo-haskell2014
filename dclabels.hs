@@ -19,32 +19,32 @@ alice  = toCNF "alice"             -- Alice's secret data
 bob    = toCNF "bob.4chan.org"     -- Label of Bob's personal server
 iCloud = toCNF "upload.icloud.com" -- Label of iCloud's upload server
 
--- Alice or iCloud can make data public:
+-- Alice or iCloud can read such data:
 aliceOrIC = alice \/ iCloud
--- Alice and Bob need to authorize the making of this data public:
+-- Both Alice and Bob need to authorize making this data public:
 aliceAndBob = alice /\ bob
 
 -- How do we check if a flow of information is allowed?
 --------------------------------------------------------------------
 
 example1 = 
- [ canFlowTo public     alice  == undefined
+ [ canFlowTo public     alice  == True
   -----------------------------------------
- , canFlowTo alice      public == undefined
+ , canFlowTo alice      public == False
   -----------------------------------------
- , canFlowTo alice      bob    == undefined
+ , canFlowTo alice      bob    == False
   -----------------------------------------
- , canFlowTo aliceOrIC  iCloud == undefined ]
+ , canFlowTo aliceOrIC  iCloud == True ]
 
 -- What happens when we combine data? Least Upper Bound!
 --------------------------------------------------------------------
 
 example2 = 
- [ canFlowTo alice (alice `lub` bob) == undefined
+ [ canFlowTo alice (alice `lub` bob) == True
   -----------------------------------------------
- , canFlowTo (alice `lub` bob) alice == undefined
+ , canFlowTo (alice `lub` bob) alice == False
   -----------------------------------------------
- , (alice `lub` bob)                 == undefined ]
+ , (alice `lub` bob)                 == alice /\ bob ]
 
 -- How do we encode authority? Privileges.
 --------------------------------------------------------------------
